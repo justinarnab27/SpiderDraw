@@ -9,29 +9,41 @@ function App() {
   const [cursorType, setCursorType] = useState<string>("default");
   const [currentSelectedShape, setCurrentSelectedShape] = useState<Shape | null>(null);
   const [lastMousePos, setLastMousePos] = useState<[number, number] | null>(null);
-  const [renderCount, setRenderCount] = useState<number>(0)
+  const [renderCount, setRenderCount] = useState<number>(0);
+  const [currentPressedState, setCurrentPressedState] = useState<Shape | null>(null);
 
   
 
   useEffect(() => {
     function processCanvasMouseMove(e: MouseEvent): void {
-      // console.log("hi");
-      // printMouseCoordinate(e);
       let [mouseX, mouseY]= getMouseCoordinate(e);
-      // console.log(mouseX, mouseY);
-      console.log(shapesArray);
-      const shapeInPressedState = shapesArray.filter((shape) =>
-        shape.currentState === ShapeStates.Pressed).at(-1);
-      if (lastMousePos !== null && shapeInPressedState !== undefined) {
+      // const shapeInPressedState = shapesArray.filter((shape) =>
+      //   shape.currentState === ShapeStates.Pressed).at(-1);
+      if (lastMousePos !== null && currentPressedState !== null) {
         let dx = mouseX - lastMousePos[0];
         let dy = mouseY - lastMousePos[1];
-        console.log(dx, dy);
-        shapeInPressedState.moveShape(dx, dy);
+        currentPressedState.moveShape(dx, dy);
+        setLastMousePos([mouseX, mouseY]);
       }
-      setLastMousePos([mouseX, mouseY]);
+      // if (lastMousePos !== null && shapeInPressedState !== undefined) {
+      //   let dx = mouseX - lastMousePos[0];
+      //   let dy = mouseY - lastMousePos[1];
+      //   console.log(dx, dy);
+      //   shapeInPressedState.moveShape(dx, dy);
+      //   setLastMousePos([mouseX, mouseY]);
+      // }
+
       setRenderCount((val) => val + 1);
     }
+    function processCanvasMouseUp() {
+      if (currentPressedState) {
+        currentPressedState.currentState = ShapeStates.Selected;
+        setCurrentSelectedShape(currentPressedState);
+        setCurrentPressedState(null);
+      }
+    }
     document.addEventListener("mousemove", processCanvasMouseMove);
+    document.addEventListener("mouseup", processCanvasMouseUp);
     return () => document.removeEventListener("mousemove", processCanvasMouseMove);
     // const draw = (ctx: CanvasRenderingContext2D) => {
     //   ctx.fillStyle = '#000000'
@@ -100,7 +112,7 @@ function App() {
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
     if (context && canvas) {
-      console.log(shapesArray);
+      // console.log(shapesArray);
       // console.log("gg");
       context.clearRect(0, 0, canvas.width, canvas.height);
       shapesArray.forEach(
@@ -138,6 +150,8 @@ function App() {
     if (shapeCursorIsOn !== undefined) {
       shapeCursorIsOn.currentState = ShapeStates.Pressed;
       setCurrentSelectedShape(shapeCursorIsOn);
+      setCurrentPressedState(shapeCursorIsOn);
+      setLastMousePos([mouseX, mouseY]);
     }
     setRenderCount((val) => val + 1);
   }
