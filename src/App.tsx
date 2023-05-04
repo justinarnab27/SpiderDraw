@@ -39,7 +39,6 @@ function App() {
       if (lastMousePos !== null && currentPressedState !== null) {
         let dx = mouseX - lastMousePos[0];
         let dy = mouseY - lastMousePos[1];
-        // console.log("HHHHH", mouseX, mouseY);
         setShapesArray(moveShape(currentPressedState, dx, dy, shapesArray));
         setLastMousePos([mouseX, mouseY]);
       }
@@ -47,14 +46,15 @@ function App() {
     }
     function processCanvasMouseUp() {
       if (currentPressedState) {
-        // console.log(currentPressedState);
         setShapesArray(arr => modifyShapeState(currentPressedState, ShapeStates.Normal, arr));
         setCurrentSelectedShape(currentPressedState);
         setCurrentPressedState(null);
       }
+      setRenderCount((val) => val + 1);
     }
     document.addEventListener("mousemove", processCanvasMouseMove);
     document.addEventListener("mouseup", processCanvasMouseUp);
+    document.addEventListener("touchend", processCanvasMouseUp);
     return () => document.removeEventListener("mousemove", processCanvasMouseMove);
   }, [shapesArray, lastMousePos, modifyShapeState, currentPressedState])
 
@@ -112,6 +112,8 @@ function App() {
   }
 
   const processCanvasMouseDown = (e: React.MouseEvent) => {
+    console.log("GGG");
+    if (e.button !== 0) return;
     let [mouseX, mouseY]= getMouseCoordinate(e);
     const shapeCursorIsOn = shapesArray.filter((shape) =>
        shape.checkIfCursorWithin(mouseX, mouseY, setCursorType)).at(-1)?.id;
