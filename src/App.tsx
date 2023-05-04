@@ -40,7 +40,7 @@ function App() {
         let dx = mouseX - lastMousePos[0];
         let dy = mouseY - lastMousePos[1];
         // console.log("HHHHH", mouseX, mouseY);
-        setShapesArray(arr => moveShape(currentPressedState, dx/2, dy/2, arr));
+        setShapesArray(moveShape(currentPressedState, dx, dy, shapesArray));
         setLastMousePos([mouseX, mouseY]);
       }
       setRenderCount((val) => val + 1);
