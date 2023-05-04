@@ -5,15 +5,18 @@ class Rectangle implements Shape {
     y1: number;
     x2: number;
     y2: number;
+    id: number;
 
     currentState = ShapeStates.Normal;
     // currentState = ShapeStates.Selected;
 
-    constructor(x1: number,
+    constructor(id: number,
+                x1: number,
                 y1: number,
                 x2: number,
                 y2: number,
                 canvasRef: React.RefObject<HTMLCanvasElement>) {
+        this.id = id;
         this.x1 = x1;
         this.x2 = x2;
         this.y1 = y1;
@@ -49,30 +52,23 @@ class Rectangle implements Shape {
     checkIfCursorWithin(mouseX: number,
                         mouseY: number,
                         setCursorType: React.Dispatch<React.SetStateAction<string>>): boolean {
-        // console.log(mouseX, mouseY);
-        // console.log(this.x1, this.x2, this.y1, this.y2);
         if (mouseX  >= this.x1 
             && mouseX <= this.x2 
             && mouseY >= this.y1 
             && mouseY <= this.y2) {
-            console.log("INNNNNNN!!!!");
             setCursorType('move');
             return true;
         } else {
             setCursorType('default');
-            console.log("OOOOOOO!!!!");
             return false;
         }
     }
 
     moveShape(dx: number, dy: number) {
-        console.log(dx, dy);
-        console.log(this.x1, this.y1, this.x2, this.y2);
         this.x1 += dx;
         this.y1 += dy;
         this.x2 += dx;
         this.y2 += dy;
-        console.log(this.x1, this.y1, this.x2, this.y2);
     }
 }
 
