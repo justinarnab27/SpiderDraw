@@ -50,16 +50,15 @@ class Rectangle implements Shape {
     }
 
     checkIfCursorWithin(mouseX: number,
-                        mouseY: number,
-                        setCursorType: React.Dispatch<React.SetStateAction<string>>): boolean {
+                        mouseY: number): boolean {
         if (mouseX  >= this.x1 
             && mouseX <= this.x2 
             && mouseY >= this.y1 
             && mouseY <= this.y2) {
-            setCursorType('move');
+            // setCursorType('move');
             return true;
         } else {
-            setCursorType('default');
+            // setCursorType('default');
             return false;
         }
     }
