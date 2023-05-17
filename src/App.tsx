@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import Rectangle from './rectangle';
 import {ShapeStates} from './shape';
-import { State } from './state';
+import { CursorStates, State } from './state';
 
 function App() {
   const boardState = useRef<State>(new State());
@@ -22,7 +22,6 @@ function App() {
       setRenderCount((val) => val + 1);
     }
     function processCanvasMouseUp(e: MouseEvent) {
-      // console.log("UUUU" , renderCount);
       if (!boardState.current.isMouseDown) return;
       boardState.current.isMouseDown = false;
       if (boardState.current.currentPressedState !== null) {
@@ -39,7 +38,6 @@ function App() {
   }) 
 
   useEffect(() => {
-    // console.log("FFF: ", renderCount);
     const drawAllShapes = () => {
       const canvas = canvasRef.current;
       const context = canvas?.getContext('2d');
@@ -84,7 +82,6 @@ function App() {
   }
 
   const processCanvasMouseDown = (e: React.MouseEvent) => {
-    // console.log("GGG");
     boardState.current.isMouseDown = true;
     if (e.button !== 0) return;
     let [mouseX, mouseY]= getMouseCoordinate(e);
@@ -103,11 +100,26 @@ function App() {
     setRenderCount((val) => val + 1);
   }
 
+  const changeCursorOnHover = (e: React.MouseEvent) => {
+    let [mouseX, mouseY]= getMouseCoordinate(e);
+    if (boardState.current.currentSelectedShape !== null) {
+      let controlCursorType = boardState.current.shapesArray[boardState.current.currentSelectedShape]
+                .checkIfCursorOnControls(mouseX, mouseY);
+      if (controlCursorType !== null) {
+        boardState.current.cursorType = controlCursorType;
+        return;
+      }
+    }
+    const shapesCursorIsOn = boardState.current.shapesArray.filter((shape) =>
+       shape.checkIfCursorWithin(mouseX, mouseY));
+    boardState.current.cursorType = shapesCursorIsOn.length > 0 ? CursorStates.Move : CursorStates.Default;
+  }
+
   return (
     <div
       id='container'
       onMouseMove={ (e) => {
-        // printMouseCoordinate(e);
+        changeCursorOnHover(e);
       }}
       >
       <h1>SpiderPad</h1>

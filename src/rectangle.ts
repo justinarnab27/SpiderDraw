@@ -1,4 +1,6 @@
-import {ShapeStates, Shape} from "./shape";
+import { CONSTANTS } from "./constants";
+import {ShapeStates, Shape, drawSmallSquare} from "./shape";
+import { CursorStates } from "./state";
 
 class Rectangle implements Shape {
     x1: number;
@@ -38,29 +40,57 @@ class Rectangle implements Shape {
         }
         // draws borders when the shape is selected
         if (this.currentState === ShapeStates.Selected && context) {
-            context.lineWidth = 3;
-            context.strokeStyle = '#ced6e5';
-            context.strokeRect(...this.getRectParameters(this.x1, this.y1, this.x2, this.y2));
+            // The code here can be simplified by having an array of 'control points' and
+            // having a single function that takes input the control points and draws the small squares
+            // can be simplified further having the control points saame for all shapes
+            drawSmallSquare(this.x1, this.y1, CONSTANTS.selection_color, context);
+            drawSmallSquare(this.x2, this.y1, CONSTANTS.selection_color, context);
+            drawSmallSquare(this.x1, this.y2, CONSTANTS.selection_color, context);
+            drawSmallSquare(this.x2, this.y2, CONSTANTS.selection_color, context);
+            drawSmallSquare((this.x1 + this.x2) / 2, this.y1, CONSTANTS.selection_color, context);
+            drawSmallSquare((this.x1 + this.x2) / 2, this.y2, CONSTANTS.selection_color, context);
+            drawSmallSquare(this.x1, (this.y1 + this.y2) / 2, CONSTANTS.selection_color, context);
+            drawSmallSquare(this.x2, (this.y1 + this.y2) / 2, CONSTANTS.selection_color, context);
         }
         if (this.currentState === ShapeStates.Pressed && context) {
             context.lineWidth = 3;
-            context.strokeStyle = '#e5eeff';
+            context.strokeStyle = CONSTANTS.pressed_color;
             context.strokeRect(...this.getRectParameters(this.x1, this.y1, this.x2, this.y2));
+        }
+    }
+
+    checkCursorInRect(mouseX: number, mouseY: number, x1: number, y1: number, x2: number, y2: number) {
+        if (mouseX  >= x1 
+            && mouseX <= x2 
+            && mouseY >= y1 
+            && mouseY <= y2) {
+            return true;
+        } else {
+            return false;
         }
     }
 
     checkIfCursorWithin(mouseX: number,
                         mouseY: number): boolean {
-        if (mouseX  >= this.x1 
-            && mouseX <= this.x2 
-            && mouseY >= this.y1 
-            && mouseY <= this.y2) {
-            // setCursorType('move');
-            return true;
-        } else {
-            // setCursorType('default');
-            return false;
-        }
+        return this.checkCursorInRect(mouseX, mouseY, this.x1, this.y1, this.x2, this.y2);
+    }
+
+    getCornersOfControlSquares(x: number, y: number, length: number): [number, number, number, number] {
+        return [x - length / 2, y - length / 2, x + length / 2, y + length / 2];
+    }
+
+    checkIfCursorOnControls(mouseX: number,
+                                mouseY: number): CursorStates | null{
+        const length = CONSTANTS.controlSquareLength;
+        if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, this.y1, length))) return CursorStates.RESIZE_NW;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, this.y2, length))) return CursorStates.RESIZE_SW;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, this.y1, length))) return CursorStates.RESIZE_NE;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, this.y2, length))) return CursorStates.RESIZE_SE;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares((this.x1 + this.x2) / 2, this.y2, length))) return CursorStates.RESIZE_S;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares((this.x1 + this.x2) / 2, this.y1, length))) return CursorStates.RESIZE_N;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, (this.y1 + this.y2) / 2, length))) return CursorStates.RESIZE_W;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, (this.y1 + this.y2) / 2, length))) return CursorStates.RESIZE_E;
+        else return null;
     }
 
     moveShape(dx: number, dy: number) {

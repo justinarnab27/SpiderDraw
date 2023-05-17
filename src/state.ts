@@ -2,7 +2,15 @@ import { Shape, ShapeStates } from "./shape";
 
 export enum CursorStates {
     Default = 'default',
-    Move = 'move'
+    Move = 'move',
+    RESIZE_NW = 'nw-resize',
+    RESIZE_NE = 'ne-resize',
+    RESIZE_SW = 'sw-resize',
+    RESIZE_SE = 'se-resize',
+    RESIZE_N = 'n-resize',
+    RESIZE_E = 'e-resize',
+    RESIZE_W = 'w-resize',
+    RESIZE_S = 's-resize',
 }
 
 export class State {
