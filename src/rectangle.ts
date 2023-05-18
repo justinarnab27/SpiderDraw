@@ -1,6 +1,5 @@
 import { CONSTANTS } from "./constants";
-import {ShapeStates, Shape, drawSmallSquare} from "./shape";
-import { CursorStates } from "./state";
+import {ShapeStates, Shape, drawSmallSquare, ControlStates} from "./shape";
 
 class Rectangle implements Shape {
     x1: number;
@@ -57,6 +56,17 @@ class Rectangle implements Shape {
             context.strokeStyle = CONSTANTS.pressed_color;
             context.strokeRect(...this.getRectParameters(this.x1, this.y1, this.x2, this.y2));
         }
+        if (this.currentState === ShapeStates.PressedControlE && context) {
+            let color = CONSTANTS.pressed_color;
+            drawSmallSquare(this.x1, this.y1, color, context);
+            drawSmallSquare(this.x2, this.y1, color, context);
+            drawSmallSquare(this.x1, this.y2, color, context);
+            drawSmallSquare(this.x2, this.y2, color, context);
+            drawSmallSquare((this.x1 + this.x2) / 2, this.y1, color, context);
+            drawSmallSquare((this.x1 + this.x2) / 2, this.y2, color, context);
+            drawSmallSquare(this.x1, (this.y1 + this.y2) / 2, color, context);
+            drawSmallSquare(this.x2, (this.y1 + this.y2) / 2, color, context);
+        }
     }
 
     checkCursorInRect(mouseX: number, mouseY: number, x1: number, y1: number, x2: number, y2: number) {
@@ -72,25 +82,26 @@ class Rectangle implements Shape {
 
     checkIfCursorWithin(mouseX: number,
                         mouseY: number): boolean {
-        return this.checkCursorInRect(mouseX, mouseY, this.x1, this.y1, this.x2, this.y2);
+        let cursorIsOnControl = this.getControlCursorIsOn(mouseX, mouseY) === ControlStates.None ? false : true;
+        return this.checkCursorInRect(mouseX, mouseY, this.x1, this.y1, this.x2, this.y2) || cursorIsOnControl;
     }
 
     getCornersOfControlSquares(x: number, y: number, length: number): [number, number, number, number] {
         return [x - length / 2, y - length / 2, x + length / 2, y + length / 2];
     }
 
-    checkIfCursorOnControls(mouseX: number,
-                                mouseY: number): CursorStates | null{
+    getControlCursorIsOn(mouseX: number,
+                         mouseY: number): ControlStates {
         const length = CONSTANTS.controlSquareLength;
-        if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, this.y1, length))) return CursorStates.RESIZE_NW;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, this.y2, length))) return CursorStates.RESIZE_SW;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, this.y1, length))) return CursorStates.RESIZE_NE;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, this.y2, length))) return CursorStates.RESIZE_SE;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares((this.x1 + this.x2) / 2, this.y2, length))) return CursorStates.RESIZE_S;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares((this.x1 + this.x2) / 2, this.y1, length))) return CursorStates.RESIZE_N;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, (this.y1 + this.y2) / 2, length))) return CursorStates.RESIZE_W;
-        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, (this.y1 + this.y2) / 2, length))) return CursorStates.RESIZE_E;
-        else return null;
+        if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, this.y1, length))) return ControlStates.NorthWest;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, this.y2, length))) return ControlStates.SouthWest;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, this.y1, length))) return ControlStates.NorthEast;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, this.y2, length))) return ControlStates.SouthEast;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares((this.x1 + this.x2) / 2, this.y2, length))) return ControlStates.South;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares((this.x1 + this.x2) / 2, this.y1, length))) return ControlStates.North;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x1, (this.y1 + this.y2) / 2, length))) return ControlStates.West;
+        else if (this.checkCursorInRect(mouseX, mouseY, ...this.getCornersOfControlSquares(this.x2, (this.y1 + this.y2) / 2, length))) return ControlStates.East;
+        else return ControlStates.None;
     }
 
     moveShape(dx: number, dy: number) {
@@ -98,6 +109,37 @@ class Rectangle implements Shape {
         this.y1 += dy;
         this.x2 += dx;
         this.y2 += dy;
+    }
+
+    resizeShape(dx: number, dy: number, direction: ShapeStates) {
+        switch (direction) {
+            case ShapeStates.PressedControlE:
+                this.x2 += dx;
+                return;
+            case ShapeStates.PressedControlW:
+                this.x1 += dx;
+                return;
+            case ShapeStates.PressedControlN:
+                this.y1 += dy;
+                return;
+            case ShapeStates.PressedControlS:
+                this.y2 += dy;
+                return;
+            case ShapeStates.PressedControlNE:
+                this.x2 += dx;
+                return;
+            case ShapeStates.PressedControlNW:
+                this.x2 += dx;
+                return;
+            case ShapeStates.PressedControlSE:
+                this.x2 += dx;
+                return;
+            case ShapeStates.PressedControlSW:
+                this.x2 += dx;
+                return;
+            default:
+                return;
+        }
     }
 }
 

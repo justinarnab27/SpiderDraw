@@ -19,8 +19,10 @@ export class State {
     currentSelectedShape: number | null;
     lastMousePos: [number, number] | null;
     currentPressedState: number | null;
+    currentResizeState: number | null;
     shapeCount: number;
     isMouseDown: boolean;
+    disableClickAfterMouseUp: boolean; // is true after mouse up event and before the subsequent click event
 
     constructor() {
         this.shapesArray = [];
@@ -28,12 +30,19 @@ export class State {
         this.currentSelectedShape = null;
         this.lastMousePos = null;
         this.currentPressedState = null;
+        this.currentResizeState = null;
         this.shapeCount = 0;
         this.isMouseDown = false;
+        this.disableClickAfterMouseUp = false;
     }
 
     moveShape(id: number, dx: number, dy: number) {
         this.shapesArray.find(shape => shape.id === id)?.moveShape(dx, dy);
+    }
+
+
+    resizeShape(id: number, dx: number, dy: number, direction: ShapeStates) {
+        this.shapesArray.find(shape => shape.id === id)?.resizeShape(dx, dy, direction);
     }
 
     modifyShapeState(id: number, newState: ShapeStates) {
