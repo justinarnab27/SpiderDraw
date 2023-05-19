@@ -111,7 +111,7 @@ class Rectangle implements Shape {
         this.y2 += dy;
     }
 
-    resizeShape(dx: number, dy: number, direction: ShapeStates) {
+    resizeShape(mouseX: number, mouseY: number, dx: number, dy: number, direction: ShapeStates) {
         switch (direction) {
             case ShapeStates.PressedControlE:
                 this.x2 += dx;
@@ -126,16 +126,20 @@ class Rectangle implements Shape {
                 this.y2 += dy;
                 return;
             case ShapeStates.PressedControlNE:
-                this.x2 += dx;
+                this.x2 = mouseX;
+                this.y1 = mouseY;
                 return;
             case ShapeStates.PressedControlNW:
-                this.x2 += dx;
+                this.x1 = mouseX;
+                this.y1 = mouseY;
                 return;
             case ShapeStates.PressedControlSE:
-                this.x2 += dx;
+                this.x2 = mouseX;
+                this.y2 = mouseY;
                 return;
             case ShapeStates.PressedControlSW:
-                this.x2 += dx;
+                this.x1 = mouseX;
+                this.y2 = mouseY;
                 return;
             default:
                 return;

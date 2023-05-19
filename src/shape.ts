@@ -13,7 +13,7 @@ export interface Shape {
     moveShape: (dx: number, dy: number) => void;
     // resizes the shape in a certain direction (East, West, SouthEast etc.), when
     // mouse is displaced by dx and dy
-    resizeShape: (dx: number, dy: number, direction: ShapeStates) => void;
+    resizeShape: (mouseX: number, mouseY: number, dx: number, dy: number, direction: ShapeStates) => void;
 }
 
 export enum ShapeStates {

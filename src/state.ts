@@ -41,8 +41,8 @@ export class State {
     }
 
 
-    resizeShape(id: number, dx: number, dy: number, direction: ShapeStates) {
-        this.shapesArray.find(shape => shape.id === id)?.resizeShape(dx, dy, direction);
+    resizeShape(id: number, mouseX: number, mouseY: number, dx: number, dy: number, direction: ShapeStates) {
+        this.shapesArray.find(shape => shape.id === id)?.resizeShape(mouseX, mouseY, dx, dy, direction);
     }
 
     modifyShapeState(id: number, newState: ShapeStates) {
